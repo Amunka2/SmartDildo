@@ -63,9 +63,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
         private UIDynamicSlider _offsetMultiplierSlider;
 
         private float _dildoLength;
-        private float _maxPullUpDistance;
-        private float _maxPushDownDistance;
-        
+
         private JSONStorableFloat _pullFactorJson;
         private JSONStorableFloat _pushFactorJson;
 
@@ -153,9 +151,6 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
                     {
                         _dildoLength = collider.bounds.size.z;
                         if (_debugModeJson != null && _debugModeJson.val) SuperController.LogMessage("Detected dildo length of " + _dildoLength);
-
-                        _maxPullUpDistance = _dildoLength * 0.2f; 
-                        _maxPushDownDistance = _dildoLength * 1f; 
                     }
                 }
 
@@ -235,7 +230,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
             RegisterStringChooser(_boneChoiceJson);
             CreateFilterablePopup(_boneChoiceJson);
             _boneChoiceJson.setCallbackFunction += OnBoneSelected;
-            
+
             _syncPositionXJson = new JSONStorableBool("Sync Position X", true);
             RegisterBool(_syncPositionXJson);
             CreateToggle(_syncPositionXJson);
@@ -250,23 +245,23 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
             RegisterBool(_syncPositionZJson);
             CreateToggle(_syncPositionZJson);
             _syncPositionZJson.setCallbackFunction += _ => OnSyncOptionsChanged();
-            
-            
-            _pullFactorJson = new JSONStorableFloat("Pull factor", -5f, 0f, 5f);
+
+
+            _pullFactorJson = new JSONStorableFloat("Pull factor", 0.2f, 0f, 5f);
             RegisterFloat(_pullFactorJson);
             CreateSlider(_pullFactorJson);
             _pullFactorJson.setCallbackFunction += _ => OnSyncOptionsChanged();
-            
-            _pushFactorJson = new JSONStorableFloat("Push factor", -5f, 0f, 5f);
+
+            _pushFactorJson = new JSONStorableFloat("Push factor", 0.6f, 0f, 5f);
             RegisterFloat(_pushFactorJson);
             CreateSlider(_pushFactorJson);
             _pushFactorJson.setCallbackFunction += _ => OnSyncOptionsChanged();
-            
+
             _syncRotationJson = new JSONStorableBool("Sync Rotation", true);
             RegisterBool(_syncRotationJson);
             CreateToggle(_syncRotationJson);
             _syncRotationJson.setCallbackFunction += _ => OnSyncOptionsChanged();
-            
+
             _followMovementJson = new JSONStorableBool("Follow Movement", true);
             RegisterBool(_followMovementJson);
 
@@ -1429,7 +1424,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
             SaveCurrentState();
             _currentAssetNameForAtom = newAssetName;
 
-            string newKey = GetStateKey(_cuaAtom.uid, newAssetName);
+            var newKey = GetStateKey(_cuaAtom.uid, newAssetName);
             LoadStateForKey(newKey);
 
             if (_debugModeJson.val) SuperController.LogMessage($"Asset name changed to '{newAssetName}'. Re-initializing bone selection.");
@@ -1769,41 +1764,38 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
         private void RecursiveGatherBones(Transform parent, List<Transform> bonesList)
         {
             if (IsPossiblyABone(parent)) bonesList.Add(parent);
-            for (int i = 0; i < parent.childCount; i++)
+            for (var i = 0; i < parent.childCount; i++)
             {
-                Transform child = parent.GetChild(i);
+                var child = parent.GetChild(i);
                 RecursiveGatherBones(child, bonesList);
             }
         }
 
         private bool IsPossiblyABone(Transform t)
         {
-            if (t == null) return false;
+            if (!t) return false;
             if (string.IsNullOrEmpty(t.name)) return false;
             if (t.name.ToLower().Contains("collider")) return false;
-            if (t.GetComponent<MeshRenderer>() != null) return false;
-            return true;
+            return !t.GetComponent<MeshRenderer>();
         }
 
         private string GetPathToRoot(Transform t, Transform root)
         {
-            if (t == null || root == null) return "";
+            if (!t || !root) return "";
             if (t == root) return "";
 
-            if (t.parent == null || t.parent == root)
+            if (!t.parent || t.parent == root)
             {
                 return t.name;
             }
-            else
-            {
-                string parentPath = GetPathToRoot(t.parent, root);
-                return string.IsNullOrEmpty(parentPath) ? t.name : parentPath + "/" + t.name;
-            }
+
+            var parentPath = GetPathToRoot(t.parent, root);
+            return string.IsNullOrEmpty(parentPath) ? t.name : parentPath + "/" + t.name;
         }
 
         private void RestoreControlRigidbodyState()
         {
-            if (_controlPoint == null)
+            if (!_controlPoint)
             {
                 _controlRigidbody = null;
                 _addedControlRigidbody = false;
@@ -1811,7 +1803,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
                 return;
             }
 
-            Rigidbody currentRb = _controlPoint.GetComponent<Rigidbody>();
+            var currentRb = _controlPoint.GetComponent<Rigidbody>();
 
             if (_addedControlRigidbody && currentRb && currentRb == _controlRigidbody)
             {
@@ -1862,7 +1854,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
                     return;
                 }
 
-                string fullPath = _boneDisplayToPath[displayName];
+                var fullPath = _boneDisplayToPath[displayName];
                 _lastSelectedBonePath = fullPath;
 
                 _selectedBone = FindBoneByPath(fullPath);
@@ -2130,7 +2122,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
                         if (_debugModeJson.val) SuperController.LogMessage("Successfully reconnected to bone");
                         _needsReconnection = false;
                         ApplyCurrentRigidbodyState();
-                        
+
                         CreateMediumObject();
                         HandleOffsetToggleChange();
 
@@ -2194,14 +2186,14 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
         {
             if (offset > maxPullUp) return maxPullUp;
             if (offset < -maxPushDown) return -maxPushDown;
-    
+
             return offset;
         }
 
         private void ParentingUpdate()
         {
             if (!_enabledJson.val || !_selectedBone || !_controlPoint || !_cuaAtom || !_cuaAtom.on) return;
-            
+
             var shouldControl = _hardParentingJson.val || (!_hardParentingJson.val &&
                                                            (_syncPositionXJson.val || _syncPositionYJson.val || _syncPositionZJson.val ||
                                                             _syncRotationJson.val));
@@ -2233,7 +2225,7 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
 
                         return;
                     }
-
+                    
                     if (_controlRigidbody.isKinematic)
                     {
                         if (_debugModeJson.val) SuperController.LogMessage("Soft Reverse Parenting: RB was kinematic, setting non-kinematic.");
@@ -2248,28 +2240,19 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
                         _syncPositionYJson.val ? targetTransformPos.y : currentPos.y,
                         _syncPositionZJson.val ? targetTransformPos.z : currentPos.z
                     );
-                    
+
                     var shouldMoveY = false;
                     var finalY = currentPos.y;
 
                     if (!_syncPositionYJson.val)
                     {
+                        var maxPullUpDistance = _dildoLength * _pullFactorJson.val; 
+                        var maxPushDownDistance = _dildoLength * _pushFactorJson.val; 
+                        
                         var currentOffset = currentPos.y - targetTransformPos.y;
-                        var correction = CalculateDeadZoneY(currentOffset, _maxPullUpDistance, _maxPushDownDistance);
-                        
-                        // if (!Mathf.Approximately(correction, 0f))
-                        // {
-                        //     if (correction > 0f)
-                        //     {
-                        //         correction *= _pullFactorJson.val;
-                        //     }
-                        //     else
-                        //     {
-                        //         correction *= _pushFactorJson.val;
-                        //     }
-                        // }
-                        
-                        if (Mathf.Abs(currentOffset) > (correction > 0 ? _maxPullUpDistance : _maxPushDownDistance))
+                        var correction = CalculateDeadZoneY(currentOffset, maxPullUpDistance, maxPushDownDistance);
+
+                        if (Mathf.Abs(currentOffset) > (correction > 0 ? maxPullUpDistance : maxPushDownDistance))
                         {
                             finalY = targetTransformPos.y + correction;
                             shouldMoveY = true;
@@ -2282,17 +2265,17 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
                     }
 
                     _targetRotation = targetTransform.rotation;
-                    
+
                     var lerpFactor = 1.0f - Mathf.Exp(-_syncSpeedJson.val * 3.0f * Time.fixedDeltaTime);
                     var lerp = Vector3.Lerp(currentPos, filteredTarget, lerpFactor);
-                    
-                    var newPos = _controlRigidbody.position; 
-                    
-                    
+
+                    var newPos = _controlRigidbody.position;
+
+
                     if (_syncPositionXJson.val) newPos.x = lerp.x;
                     if (shouldMoveY) newPos.y = Mathf.Lerp(currentPos.y, finalY, lerpFactor);
                     if (_syncPositionZJson.val) newPos.z = lerp.z;
-                    
+
                     _controlRigidbody.MovePosition(newPos);
 
                     if (!_syncRotationJson.val) return;
