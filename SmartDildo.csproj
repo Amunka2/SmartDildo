@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    </PropertyGroup>
+
+    <!-- Assemblies aus deiner VaM-Installation -->
+    <ItemGroup>
+        <Reference Include="F:\VaM\app\VaM_Data\Managed\UnityEngine*.dll" />
+        <Reference Include="F:\VaM\app\VaM_Data\Managed\Assembly-CSharp.dll" />
+        <Reference Include="F:\VaM\app\VaM_Data\Managed\Assembly-CSharp-firstpass.dll" Condition="Exists('F:\VaM\app\VaM_Data\Managed\Assembly-CSharp-firstpass.dll')" />
+    </ItemGroup>
+
+</Project>

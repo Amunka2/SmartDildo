@@ -1,0 +1,22 @@
+{ 
+   "licenseType" : "FC", 
+   "creatorName" : "Amunka", 
+   "packageName" : "SmartDildo", 
+   "includeVersionsInReferences": "true",
+   "description" : "A utility script designed to be placed on a Dildo atom to ensure precise positioning relative to a target Person/Node.\n", 
+   "credits" : "Skynet", 
+   "instructions" : "Simply add this script to your Dildo atom. Select the target Person/Node, and use the provided toggles and sliders to lock specific axes or define your custom dead zone for the Y-axis.\n", 
+   "promotionalLink" : "", 
+   "programVersion" : "1.0.1.0", 
+   "contentList" : [ 
+      "Custom/Scripts/Amunka/SmartDildo/src/SmartDildo.cs"
+   ], 
+   "dependencies" : { 
+   }, 
+   "customOptions" : { 
+      "preloadMorphs" : "false"
+   },
+   "hadReferenceIssues" : "false", 
+   "referenceIssues" : [ 
+   ]
+}
