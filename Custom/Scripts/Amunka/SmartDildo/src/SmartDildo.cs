@@ -125,6 +125,12 @@ namespace SmartDildo.Custom.Scripts.Amunka.SmartDildo
         {
             try
             {
+                if (containingAtom.uid == "Person")
+                {
+                    SuperController.LogError("SmartDildo: Invalid atom type. Only Non-Person atoms are supported");
+                    return;
+                }
+                
                 pluginLabelJSON.val = "Bone Control";
 
                 InitializeUI();
